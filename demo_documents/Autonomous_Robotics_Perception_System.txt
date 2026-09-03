@@ -1,0 +1,23 @@
+Autonomous Mobile Robotics Spatial Perception and Mapping Architecture
+Advanced Robotics and Autonomous Systems Laboratory
+
+Abstract:
+A unified spatial perception and point-cloud feature extraction pipeline for autonomous mobile robots operating in dynamic warehouse environments. The system combines LiDAR odometry, stereo depth estimation, and semantic obstacle classification to maintain a global topological vector map.
+
+Problem Definition:
+Conventional SLAM architectures experience rapid localization drift and severe computational bottlenecks when navigating unstructured logistics hubs with moving inventory and variable lighting.
+
+Key Deliverables:
+1. Real-time 3D bounding box detection running at 30 FPS on embedded edge hardware.
+2. Maintain sub-centimeter global localization fidelity over 10-kilometer mapping trajectories.
+3. Expose zero-copy shared memory IPC and gRPC APIs for fleet management software.
+
+Technical Specifications:
+Languages: C++, Python, CUDA
+Frameworks: PyTorch, OpenCV, ROS2
+Databases & Cache: Redis, SQLite
+APIs & Connectivity: gRPC, Docker, WebSocket
+AI & ML Engine: YOLO, Detectron2, Vector Embeddings
+
+Source Code: https://github.com/robotics-lab/spatial-perception
+System Docs: https://docs.robotics.internal/spatial-mapping/v1
