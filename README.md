@@ -154,6 +154,50 @@ After running `python manage.py seed_data`, you can sign in with the following a
 
 ---
 
+## 🌐 Production Deployment Guide
+
+### Deploy Backend to Render
+
+1. Create a free account at [render.com](https://render.com).
+2. Click **New +** -> **Web Service**.
+3. Connect your GitHub repository: `https://github.com/Gokul-anand-b/Duplisense-AI`.
+4. Configure the Web Service:
+   - **Name**: `duplisense-backend` (or any unique name)
+   - **Region**: Choose closest to you (e.g., Singapore or Oregon)
+   - **Branch**: `main`
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `./build.sh` (or `pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate && python manage.py seed_data`)
+   - **Start Command**: `gunicorn duplisense_backend.wsgi:application`
+5. In **Environment Variables**, add:
+   - `PYTHON_VERSION`: `3.11.9`
+   - `DEBUG`: `False`
+   - `SECRET_KEY`: `<Generate a random secure string>`
+   - `ALLOWED_HOSTS`: `*`
+6. *(Optional)* To use PostgreSQL instead of SQLite:
+   - Create a **PostgreSQL** database on Render (free tier).
+   - Add `DATABASE_URL` as an environment variable pointing to your Render Postgres internal database URL.
+7. Click **Create Web Service**. Once deployed, copy your Render service URL (e.g. `https://duplisense-backend.onrender.com`).
+
+---
+
+### Deploy Frontend to Vercel
+
+1. Create a free account at [vercel.com](https://vercel.com).
+2. Click **Add New...** -> **Project**.
+3. Import your GitHub repository: `Duplisense-AI`.
+4. Configure project settings:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `./` (leave default)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. In **Environment Variables**, add:
+   - `VITE_API_URL`: `https://<your-render-backend-name>.onrender.com/api`
+6. Click **Deploy**.
+7. Vercel will automatically build and publish your frontend with client-side SPA routing supported via `vercel.json`.
+
+---
+
 ## 📄 License
 
 This project was developed for academic and enterprise research purposes.

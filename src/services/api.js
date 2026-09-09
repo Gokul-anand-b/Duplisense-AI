@@ -1,18 +1,10 @@
 /**
  * DupliSense AI — API Service Client (Django REST Framework Backend)
  * Connects React 19 Frontend to Django at http://127.0.0.1:8000/api/
- * Includes automatic graceful fallback to mockData if backend is unreachable.
+ * Strict real data: No mock data fallbacks.
  */
-import {
-  mockProjects,
-  mockSimilarityResults,
-  mockRecommendations,
-  mockApprovals,
-  mockAnalytics,
-  mockUsers,
-} from '../data/mockData';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 async function fetchJson(endpoint, options = {}) {
   try {
@@ -29,7 +21,7 @@ async function fetchJson(endpoint, options = {}) {
     }
     return await res.json();
   } catch (err) {
-    console.warn(`[Django API] Failed to fetch ${endpoint}, using mock fallback:`, err.message);
+    console.warn(`[Django API] Failed to fetch ${endpoint}:`, err.message);
     return null;
   }
 }
@@ -58,10 +50,6 @@ export const authApi = {
       body: JSON.stringify({ email, password }),
     });
     if (result && result.user) return result.user;
-    
-    // Fallback: match mock user
-    const found = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (found) return found;
     throw new Error('Invalid credentials');
   },
 
@@ -76,12 +64,22 @@ export const authApi = {
 
   getMe: async () => {
     const result = await fetchJson('/auth/me/');
-    return result || mockUsers[0];
+    return result || null;
   },
 
   getUsers: async () => {
     const result = await fetchJson('/auth/users/');
-    return result || mockUsers;
+    return Array.isArray(result) ? result : [];
+  },
+
+  getDepartments: async () => {
+    const result = await fetchJson('/auth/departments/');
+    return Array.isArray(result) ? result : [];
+  },
+
+  getTeams: async () => {
+    const result = await fetchJson('/auth/teams/');
+    return Array.isArray(result) ? result : [];
   },
 };
 
@@ -89,12 +87,12 @@ export const projectsApi = {
   getAll: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
     const result = await fetchJson(`/projects/${query ? '?' + query : ''}`);
-    return result || mockProjects;
+    return Array.isArray(result) ? result : [];
   },
 
   getById: async (id) => {
     const result = await fetchJson(`/projects/${id}/`);
-    return result || mockProjects.find((p) => p.id === parseInt(id));
+    return result || null;
   },
 
   submit: async (projectData) => {
@@ -102,7 +100,7 @@ export const projectsApi = {
       method: 'POST',
       body: JSON.stringify(projectData),
     });
-    return result || { project: { ...projectData, id: Date.now() } };
+    return result;
   },
 
   extractFromDocument: async (file) => {
@@ -123,17 +121,29 @@ export const projectsApi = {
   getDownloadUrl: (projectId) => {
     return `${API_BASE_URL}/projects/${projectId}/download-code/`;
   },
+
+  delete: async (id) => {
+    return await fetchJson(`/projects/${id}/`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 export const similarityApi = {
   getAll: async () => {
     const result = await fetchJson('/similarity/');
-    return result || mockSimilarityResults;
+    return Array.isArray(result) ? result : [];
   },
 
   getById: async (id) => {
     const result = await fetchJson(`/similarity/${id}/`);
-    return result || mockSimilarityResults.find((r) => r.id === parseInt(id));
+    return result || null;
+  },
+
+  delete: async (id) => {
+    return await fetchJson(`/similarity/${id}/`, {
+      method: 'DELETE',
+    });
   },
 
   scanProject: async (projectId) => {
@@ -163,7 +173,7 @@ export const similarityApi = {
 export const approvalsApi = {
   getRecommendations: async (status = '') => {
     const result = await fetchJson(`/approvals/recommendations/${status ? '?status=' + status : ''}`);
-    return result || (status ? mockRecommendations.filter(r => r.status === status) : mockRecommendations);
+    return Array.isArray(result) ? result : [];
   },
 
   requestReuse: async (data) => {
@@ -191,7 +201,7 @@ export const approvalsApi = {
 
   getApprovals: async () => {
     const result = await fetchJson('/approvals/');
-    return result || mockApprovals;
+    return Array.isArray(result) ? result : [];
   },
 
   getDownloadUrl: (recommendationId) => {
@@ -202,6 +212,12 @@ export const approvalsApi = {
 export const analyticsApi = {
   getOverview: async () => {
     const result = await fetchJson('/analytics/');
-    return result || mockAnalytics;
+    return result || {
+      totalHoursSaved: 0,
+      totalCostSaved: 0,
+      efficiencyRate: 0,
+      completedProjects: 0,
+      totalCodeSegments: 0,
+    };
   },
 };

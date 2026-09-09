@@ -59,20 +59,29 @@ export const ITEMS_PER_PAGE = 10;
 // Navigation items filtered strictly by user role
 export const NAV_ITEMS = [
   {
-    section: 'Workspace',
+    section: 'Developer Workspace',
     items: [
-      { path: '/submit', label: 'Submit Proposal', icon: '⚡', roles: ['developer', 'user', 'manager', 'admin'] },
-      { path: '/similarity', label: 'Similarity & Code Scan', icon: '🔍', roles: ['developer', 'user', 'manager', 'admin'] },
-      { path: '/projects', label: 'Projects Catalog', icon: '📁', roles: ['developer', 'user', 'manager', 'admin'] },
-      { path: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['developer', 'user', 'manager', 'admin'] },
+      { path: '/dashboard', label: 'Submit Proposal', icon: '⚡', roles: ['developer', 'user'] },
+      { path: '/similarity', label: 'Similarity Results', icon: '🔍', roles: ['developer', 'user'] },
+    ],
+  },
+  {
+    section: 'Management & Review',
+    items: [
+      { path: '/dashboard', label: 'Manager Portal', icon: '👔', roles: ['manager'] },
+      { path: '/approvals', label: 'Pending Approvals', icon: '✅', roles: ['manager'] },
+      { path: '/projects', label: 'Baseline Projects', icon: '📁', roles: ['manager'] },
+      { path: '/similarity', label: 'Similarity Scans', icon: '🔍', roles: ['manager'] },
     ],
   },
   {
     section: 'Admin Governance',
     items: [
-      { path: '/approvals', label: 'Code Reuse Approvals', icon: '✅', roles: ['manager', 'admin'] },
-      { path: '/analytics', label: 'Cost Savings & ROI', icon: '📈', roles: ['manager', 'admin'] },
-      { path: '/admin', label: 'Admin Settings', icon: '⚙️', roles: ['admin'] },
+      { path: '/dashboard', label: 'Executive Dashboard', icon: '🛡️', roles: ['admin'] },
+      { path: '/admin', label: 'System Governance', icon: '⚙️', roles: ['admin'] },
+      { path: '/analytics', label: 'Cost Savings & ROI', icon: '📈', roles: ['admin'] },
+      { path: '/approvals', label: 'Approvals Audit', icon: '✅', roles: ['admin'] },
+      { path: '/projects', label: 'All Projects', icon: '📁', roles: ['admin'] },
     ],
   },
 ];

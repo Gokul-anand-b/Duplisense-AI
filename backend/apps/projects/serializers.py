@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Project, ProjectDocument
+from .models import Project, ProjectDocument, CodeSegment
 from apps.accounts.serializers import UserSerializer, DepartmentSerializer, TeamSerializer
+
+class CodeSegmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CodeSegment
+        fields = ['id', 'file_path', 'name', 'segment_type', 'docstring', 'code_content', 'signature', 'start_line', 'end_line']
 
 class ProjectDocumentSerializer(serializers.ModelSerializer):
     class Meta:

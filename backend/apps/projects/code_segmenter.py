@@ -151,15 +151,37 @@ def segment_generic_code(code_text, file_path, language):
     segments = []
     lines = code_text.splitlines()
 
-    # Regex patterns for functions and classes
+    # Regex patterns for functions, classes, and HTTP route endpoints
     fn_pattern = re.compile(
         r'^\s*(?:export\s+)?(?:async\s+)?(?:function\s+([a-zA-Z0-9_$]+)|(?:const|let|var)\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>|def\s+([a-zA-Z0-9_]+)|func\s+(?:\([^)]*\)\s*)?([a-zA-Z0-9_]+)|public\s+[\w<>[\]]+\s+([a-zA-Z0-9_]+)\s*\()',
+        re.MULTILINE
+    )
+    route_pattern = re.compile(
+        r'^\s*(?:app|router)\.(get|post|put|delete|patch)\s*\(\s*[\'"`]([^\'"`]+)[\'"`]',
         re.MULTILINE
     )
     class_pattern = re.compile(
         r'^\s*(?:export\s+)?class\s+([a-zA-Z0-9_$]+)',
         re.MULTILINE
     )
+
+    # Route endpoints (Express / Node.js)
+    for match in route_pattern.finditer(code_text):
+        method, path_str = match.group(1).upper(), match.group(2)
+        name = f"[{method}] {path_str}"
+        line_no = code_text[:match.start()].count('\n') + 1
+        snippet = '\n'.join(lines[line_no - 1:min(line_no + 35, len(lines))])
+
+        segments.append({
+            'name': name,
+            'segment_type': 'endpoint',
+            'docstring': f"HTTP {method} route handler for {path_str}",
+            'signature': match.group(0).strip(),
+            'code_content': snippet[:3000],
+            'start_line': line_no,
+            'end_line': min(line_no + 35, len(lines)),
+            'file_path': file_path,
+        })
 
     for match in fn_pattern.finditer(code_text):
         name = next(g for g in match.groups() if g is not None)

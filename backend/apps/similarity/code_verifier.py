@@ -34,14 +34,18 @@ class FAISSCodeEngine:
         self.segment_ids = []
 
     def _extract_segment_representation(self, segment):
-        """Combines signature, docstring, symbol name, and code text into an embedding query."""
+        """Combines signature, docstring, symbol name, project context, and code text into an embedding query."""
+        proj_title = segment.project.title if segment.project else ""
+        proj_techs = " ".join(segment.project.all_technologies) if segment.project else ""
         parts = [
+            f"project: {proj_title}",
+            f"tech: {proj_techs}",
             f"name: {segment.name}",
             f"type: {segment.segment_type}",
             f"file: {segment.file_path}",
             f"signature: {segment.signature}",
             f"doc: {segment.docstring}",
-            segment.code_content[:800]  # first 800 chars of code logic
+            segment.code_content[:1200]  # code logic
         ]
         return ' '.join(parts)
 
@@ -125,7 +129,7 @@ class FAISSCodeEngine:
                     if exclude_project_id and seg.project_id == exclude_project_id:
                         continue
 
-                    score_pct = int(min(max(dist * 100 * 1.3, 15), 98))
+                    score_pct = int(min(max(dist * 100 * 2.1, 20), 96))
                     results.append({
                         'segment_id': seg.id,
                         'project_id': seg.project.id,
@@ -198,14 +202,16 @@ def verify_document_against_codebase(extracted_fields, exclude_project_id=None, 
 
     highest_score = max(s['similarity_score'] for s in matching_segments)
 
-    if highest_score >= 70:
+    if highest_score >= 60:
         level = 'high'
         hours = 160
-        verdict = f"High code-level duplication detected! {len(matching_segments)} functions and classes directly match the proposed specifications in existing project repositories."
-    elif highest_score >= 45:
+        target_name = matching_segments[0]['project_title']
+        verdict = f"High code-level duplication detected! {len(matching_segments)} functions and classes directly match the proposed specifications in existing project '{target_name}'."
+    elif highest_score >= 35:
         level = 'medium'
         hours = 80
-        verdict = f"Moderate code overlap detected. Several shared utilities, data access models, and pipelines ({len(matching_segments)} modules) can be extracted and reused."
+        target_name = matching_segments[0]['project_title']
+        verdict = f"Moderate code overlap detected. Several shared utilities, routes, and data access models ({len(matching_segments)} modules) can be extracted and reused from '{target_name}'."
     else:
         level = 'low'
         hours = 20

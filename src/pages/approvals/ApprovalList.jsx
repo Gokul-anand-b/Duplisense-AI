@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { mockApprovals, mockRecommendations } from '../../data/mockData';
 import { approvalsApi } from '../../services/api';
 import { RECOMMENDATION_CATEGORIES } from '../../utils/constants';
 import { formatCurrency, formatDate } from '../../utils/helpers';
@@ -8,8 +7,8 @@ import { useToast } from '../../hooks/useToast';
 export default function ApprovalList() {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('pending');
-  const [pendingRecs, setPendingRecs] = useState(() => mockRecommendations.filter((r) => r.status === 'pending'));
-  const [approvedList, setApprovedList] = useState(mockApprovals);
+  const [pendingRecs, setPendingRecs] = useState([]);
+  const [approvedList, setApprovedList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -23,7 +22,7 @@ export default function ApprovalList() {
         setApprovedList(apps);
       }
     } catch (err) {
-      console.warn('API fetch warning, using fallback mock data:', err);
+      console.warn('API fetch warning in ApprovalList:', err);
     } finally {
       setLoading(false);
     }

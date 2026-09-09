@@ -33,7 +33,23 @@ class ProjectListCreateView(APIView):
         if serializer.is_valid():
             project = serializer.save()
             
-            # Automatically run semantic similarity vector scan in background
+            # If submitted as a completed project (by Manager), update FAISS Vector Database directly
+            if project.status == 'completed':
+                from apps.similarity.engine import faiss_engine
+                from apps.similarity.code_verifier import faiss_code_engine
+                try:
+                    faiss_engine.fit_and_index(list(Project.objects.all()))
+                    faiss_code_engine.fit_and_index_all_segments()
+                except Exception as e:
+                    print(f"FAISS index update warning: {e}")
+                
+                return Response({
+                    'message': 'Completed project ingested and indexed into FAISS Vector Database successfully.',
+                    'project': ProjectSerializer(project).data,
+                    'similarity_match_id': None
+                }, status=status.HTTP_201_CREATED)
+
+            # Automatically run semantic similarity vector scan for new developer proposals
             try:
                 similarity_result = run_similarity_scan_for_project(project)
             except Exception as e:
@@ -41,7 +57,7 @@ class ProjectListCreateView(APIView):
                 similarity_result = None
 
             return Response({
-                'message': 'Project submitted successfully',
+                'message': 'Project proposal submitted and scanned successfully',
                 'project': ProjectSerializer(project).data,
                 'similarity_match_id': similarity_result.id if similarity_result else None
             }, status=status.HTTP_201_CREATED)

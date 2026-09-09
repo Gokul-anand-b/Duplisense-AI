@@ -33,13 +33,24 @@ class RecommendationApproveView(APIView):
                 recommendation=rec,
                 defaults={
                     'reviewer': reviewer,
-                    'notes': request.data.get('notes', 'Verified and approved for cross-team module reuse.'),
+                    'notes': request.data.get('notes', 'Manager verified architecture similarity and unlocked repository access.'),
                     'savings': savings
                 }
             )
 
+            # Log to ActivityLog
+            try:
+                from apps.core.models import ActivityLog
+                ActivityLog.objects.create(
+                    user=reviewer,
+                    action="Repository Access Approved",
+                    details=f"Unlocked code & repo for '{rec.title}' saving {hours} engineering hours (₹{savings.cost_saved:,})."
+                )
+            except Exception:
+                pass
+
             return Response({
-                'message': 'Recommendation approved successfully',
+                'message': 'Recommendation approved successfully. Source code and Git repository unlocked for developer.',
                 'approval': ApprovalSerializer(approval).data
             })
         except Recommendation.DoesNotExist:
@@ -99,9 +110,10 @@ class RequestReuseView(APIView):
                 'status': 'pending',
             }
         )
-        if not created and rec.status == 'rejected':
+        if not created:
             rec.status = 'pending'
             rec.description = notes
+            rec.evidence = evidence
             rec.save()
 
         return Response({

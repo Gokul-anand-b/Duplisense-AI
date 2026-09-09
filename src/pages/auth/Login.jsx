@@ -7,6 +7,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeRoleLoading, setActiveRoleLoading] = useState(null);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -16,15 +17,15 @@ export default function Login() {
     setEmail(roleEmail);
     setPassword('password123');
     setError('');
-    setLoading(true);
+    setActiveRoleLoading(roleName);
     try {
       await login(roleEmail, 'password123');
-      toast.success(`Logged in as ${roleName}`, `Welcome to your tailored ${roleName} portal.`);
-      navigate(roleName === 'Developer' ? '/submit' : '/dashboard');
+      toast.success(`Welcome, ${roleName}`, `Signed into your enterprise ${roleName} workspace.`);
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please check backend server.');
     } finally {
-      setLoading(false);
+      setActiveRoleLoading(null);
     }
   };
 
@@ -40,106 +41,195 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      toast.success('Welcome back!', `Signed in as ${user.firstName || 'User'}.`);
-      navigate(user.role === 'admin' ? '/dashboard' : '/submit');
+      toast.success('Welcome back!', `Signed in as ${user.firstName || user.role}.`);
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Invalid credentials.');
+      setError(err.message || 'Invalid credentials. Please verify your email and password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
-      {/* Background Ambience */}
-      <div className="bg-gradient-mesh">
-        <div className="bg-orb-1" style={{ top: '10%', left: '20%' }} />
-        <div className="bg-orb-3" style={{ bottom: '15%', right: '20%' }} />
-      </div>
-      <div className="bg-grid-pattern" />
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '3rem 1.5rem',
+        position: 'relative',
+        background: '#000000',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background Animated Ambient Grid & Light Sweep */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse at 50% 35%, black 40%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 35%, black 40%, transparent 80%)',
+        }}
+      />
 
-      <div style={{ maxWidth: '880px', width: '100%', position: 'relative', zIndex: 10 }}>
-        {/* Header Branding (No Topbar) */}
-        <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            padding: '0.4rem 1rem',
-            borderRadius: '99px',
-            background: 'rgba(124, 58, 237, 0.18)',
-            border: '1px solid rgba(139, 92, 246, 0.35)',
-            fontSize: '0.8rem',
-            fontFamily: 'var(--font-mono)',
-            fontWeight: 600,
-            color: '#c4b5fd',
-            marginBottom: '1rem',
-          }}>
-            <span>✦</span> AI DUPLICATE DETECTION & CODE REUSE PLATFORM
+      {/* Floating Ambient White Radiance */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '20%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '700px',
+          height: '400px',
+          background: 'radial-gradient(ellipse, rgba(255, 255, 255, 0.06) 0%, transparent 70%)',
+          filter: 'blur(90px)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+
+      <div style={{ maxWidth: '1180px', width: '100%', position: 'relative', zIndex: 10 }}>
+        {/* Header Branding */}
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              padding: '0.4rem 1.15rem',
+              borderRadius: '99px',
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              fontSize: '0.78rem',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              color: '#ffffff',
+              letterSpacing: '0.04em',
+              marginBottom: '1.25rem',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <span>✦</span> ENTERPRISE CODE INTELLIGENCE & REUSE GOVERNANCE
           </div>
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '2.5rem',
-            fontWeight: 900,
-            letterSpacing: '-0.03em',
-            margin: '0 0 0.5rem 0',
-            color: '#f8fafc',
-          }}>
-            DupliSense <span className="text-gradient">AI</span>
+
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '3.2rem',
+              fontWeight: 900,
+              letterSpacing: '-0.04em',
+              margin: '0 0 0.6rem 0',
+              color: '#ffffff',
+              lineHeight: 1.1,
+            }}
+          >
+            DupliSense <span style={{ color: '#ffffff', borderBottom: '3px solid #ffffff' }}>AI</span>
           </h1>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
-            Select your role to access your dedicated workflow
+
+          <p
+            style={{
+              color: '#a1a1aa',
+              fontSize: '1.05rem',
+              maxWidth: '620px',
+              margin: '0 auto',
+              lineHeight: 1.6,
+            }}
+          >
+            Eliminate redundant engineering. Select your organizational role below to access your dedicated workflow, or authenticate with custom credentials.
           </p>
         </div>
 
-        {/* Dual Role Selector Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem',
-        }}>
+        {/* 3 Dedicated Role Selector Cards (Monochrome Bold) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '2.5rem',
+          }}
+        >
           {/* Card 1: Developer Role */}
-          <div className="glass-card" style={{
-            padding: '2rem',
-            background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.25) 0%, rgba(15, 23, 42, 0.75) 100%)',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            borderRadius: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.4)',
-            transition: 'transform 0.2s, border-color 0.2s',
-          }}>
+          <div
+            className="glass-card"
+            style={{
+              padding: '2rem',
+              background: '#0e0e11',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              borderRadius: '18px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.85)',
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-6px)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.45)';
+              e.currentTarget.style.boxShadow = '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.85)';
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '14px',
+                    background: '#18181b',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                  }}
+                >
                   💻
                 </div>
-                <span className="badge badge-active" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', borderColor: '#059669' }}>
-                  Developer Role
+                <span
+                  className="badge"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    fontWeight: 700,
+                  }}
+                >
+                  Developer
                 </span>
               </div>
 
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>
-                Developer Portal
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+                Developer Workspace
               </h2>
-              <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-                Enter new project specifications or upload proposal reports (PDF/DOCX). The FAISS vector engine checks against all stored projects, detects overlapping code, and allows requesting approved source code downloads.
+              <p style={{ fontSize: '0.88rem', color: '#a1a1aa', lineHeight: 1.55, marginBottom: '1.4rem' }}>
+                Upload proposal documents to auto-extract technical specifications, run vector searches against existing baseline systems, and request repository access.
               </p>
 
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#34d399' }}>✓</span> Enter specs or upload PDF/DOCX report
+              <div style={{ fontSize: '0.82rem', color: '#e4e4e7', display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Document upload (PDF, DOCX, TXT)
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#34d399' }}>✓</span> Run FAISS vector database similarity scan
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> 3-Layer auto-extraction pipeline
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#34d399' }}>✓</span> Request code access from Admin
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> FAISS 512-dim Vector search
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#34d399' }}>✓</span> Download approved source code ZIP
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Request Git repository unlock
                 </div>
               </div>
             </div>
@@ -148,66 +238,216 @@ export default function Login() {
               type="button"
               id="login-developer-btn"
               className="btn btn-primary"
-              disabled={loading}
+              disabled={activeRoleLoading !== null || loading}
               onClick={() => handleRoleLogin('dev@duplisense.ai', 'Developer')}
               style={{
-                background: 'linear-gradient(135deg, #059669, #10b981)',
-                boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)',
-                padding: '0.85rem',
+                padding: '0.9rem',
                 fontSize: '0.95rem',
-                fontWeight: 700,
+                fontWeight: 800,
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
+                cursor: 'pointer',
               }}
             >
-              <span>💻</span> Enter as Developer →
+              {activeRoleLoading === 'Developer' ? (
+                <>
+                  <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: '#000000' }} />
+                  <span>Entering Workspace...</span>
+                </>
+              ) : (
+                <>
+                  <span>💻</span> Enter Developer Portal →
+                </>
+              )}
             </button>
           </div>
 
-          {/* Card 2: Admin Role */}
-          <div className="glass-card" style={{
-            padding: '2rem',
-            background: 'linear-gradient(135deg, rgba(88, 28, 135, 0.25) 0%, rgba(15, 23, 42, 0.75) 100%)',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-            borderRadius: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 12px 35px rgba(0, 0, 0, 0.4)',
-            transition: 'transform 0.2s, border-color 0.2s',
-          }}>
+          {/* Card 2: Manager Role */}
+          <div
+            className="glass-card"
+            style={{
+              padding: '2rem',
+              background: '#0e0e11',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              borderRadius: '18px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.85)',
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-6px)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.45)';
+              e.currentTarget.style.boxShadow = '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.85)';
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'rgba(124, 58, 237, 0.2)', border: '1px solid rgba(139, 92, 246, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
-                  🛡️
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '14px',
+                    background: '#18181b',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                  }}
+                >
+                  👔
                 </div>
-                <span className="badge badge-active" style={{ background: 'rgba(124, 58, 237, 0.2)', color: '#c4b5fd', borderColor: '#7c3aed' }}>
-                  Admin / Manager Role
+                <span
+                  className="badge"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    fontWeight: 700,
+                  }}
+                >
+                  Project Manager
                 </span>
               </div>
 
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>
-                Admin & Approvals Portal
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+                Manager Portal
               </h2>
-              <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-                Ingest completed enterprise projects (PDF/ZIP/folder of any stack), review developer source code reuse requests, approve access, and track verified development cost savings (ROI).
+              <p style={{ fontSize: '0.88rem', color: '#a1a1aa', lineHeight: 1.55, marginBottom: '1.4rem' }}>
+                Ingest completed enterprise projects into the FAISS vector database. Review developer repository reuse applications and unlock Git access.
               </p>
 
-              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#c4b5fd' }}>✓</span> Upload completed project archives & codebases
+              <div style={{ fontSize: '0.82rem', color: '#e4e4e7', display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Ingest completed code & documentation
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#c4b5fd' }}>✓</span> Review incoming developer code reuse requests
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Live vector database indexing
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#c4b5fd' }}>✓</span> 1-Click Approve or Reject requests
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Review incoming reuse requests
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ color: '#c4b5fd' }}>✓</span> Monitor engineering hours saved & ROI metrics
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> 1-Click Git access unlocking
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              id="login-manager-btn"
+              className="btn btn-primary"
+              disabled={activeRoleLoading !== null || loading}
+              onClick={() => handleRoleLogin('manager@duplisense.ai', 'Engineering Manager')}
+              style={{
+                padding: '0.9rem',
+                fontSize: '0.95rem',
+                fontWeight: 800,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              {activeRoleLoading === 'Engineering Manager' ? (
+                <>
+                  <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: '#000000' }} />
+                  <span>Entering Portal...</span>
+                </>
+              ) : (
+                <>
+                  <span>👔</span> Enter Manager Portal →
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Card 3: Admin Role */}
+          <div
+            className="glass-card"
+            style={{
+              padding: '2rem',
+              background: '#0e0e11',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              borderRadius: '18px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.85)',
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-6px)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.45)';
+              e.currentTarget.style.boxShadow = '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.85)';
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '14px',
+                    background: '#18181b',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                  }}
+                >
+                  🛡️
+                </div>
+                <span
+                  className="badge"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    fontWeight: 700,
+                  }}
+                >
+                  Compliance Admin
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
+                Admin Analytics
+              </h2>
+              <p style={{ fontSize: '0.88rem', color: '#a1a1aa', lineHeight: 1.55, marginBottom: '1.4rem' }}>
+                Enterprise analytics dashboard tracking hours saved, duplication rates, monetary ROI, vector index integrity, and audit governance.
+              </p>
+
+              <div style={{ fontSize: '0.82rem', color: '#e4e4e7', display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Real engineering hours preserved
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Monetary ROI & cost savings tracking
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> Cross-team reuse efficiency rate
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ color: '#ffffff', fontWeight: 900 }}>✓</span> FAISS vector index status & health
                 </div>
               </div>
             </div>
@@ -216,70 +456,145 @@ export default function Login() {
               type="button"
               id="login-admin-btn"
               className="btn btn-primary"
-              disabled={loading}
+              disabled={activeRoleLoading !== null || loading}
               onClick={() => handleRoleLogin('admin@duplisense.ai', 'Admin')}
               style={{
-                background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)',
-                padding: '0.85rem',
+                padding: '0.9rem',
                 fontSize: '0.95rem',
-                fontWeight: 700,
+                fontWeight: 800,
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
+                cursor: 'pointer',
               }}
             >
-              <span>🛡️</span> Enter as Admin →
+              {activeRoleLoading === 'Admin' ? (
+                <>
+                  <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: '#000000' }} />
+                  <span>Entering Panel...</span>
+                </>
+              ) : (
+                <>
+                  <span>🛡️</span> Enter Admin Panel →
+                </>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Custom Credentials Accordion / Form */}
-        <div className="glass-card" style={{
-          padding: '1.75rem',
-          maxWidth: '520px',
-          margin: '0 auto',
-          background: 'rgba(15, 23, 42, 0.75)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '16px',
-        }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '0.25rem', textAlign: 'center' }}>
-            Or Sign In with Custom Email
-          </h3>
-          <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', textAlign: 'center', marginBottom: '1.25rem' }}>
-            Enter your organization credentials below
-          </p>
+        {/* Custom Credentials Form (Obsidian Dark Glass) */}
+        <div
+          className="glass-card"
+          style={{
+            padding: '2.25rem',
+            maxWidth: '520px',
+            margin: '0 auto',
+            background: '#0a0a0d',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '20px',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9)',
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: '0 0 0.35rem 0' }}>
+              Sign In with Custom Credentials
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: '#a1a1aa', margin: 0 }}>
+              Or click a demo role to prefill credentials instantly:
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => { setEmail('dev@duplisense.ai'); setPassword('password123'); }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '99px',
+                  cursor: 'pointer',
+                }}
+              >
+                Developer
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('manager@duplisense.ai'); setPassword('password123'); }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '99px',
+                  cursor: 'pointer',
+                }}
+              >
+                Manager
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('admin@duplisense.ai'); setPassword('password123'); }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '99px',
+                  cursor: 'pointer',
+                }}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
             {error && (
-              <div style={{
-                padding: '0.75rem 1rem',
-                background: 'rgba(239, 68, 68, 0.12)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '8px',
-                color: '#fca5a5',
-                fontSize: '0.85rem',
-              }}>
+              <div
+                style={{
+                  padding: '0.75rem 1rem',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '8px',
+                  color: '#fca5a5',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {error}
               </div>
             )}
 
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Email Address</label>
+              <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
+                Email Address
+              </label>
               <input
                 type="email"
                 className="form-input"
-                placeholder="developer@duplisense.ai"
+                placeholder="dev@duplisense.ai, manager@duplisense.ai..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  color: '#ffffff',
+                  fontSize: '0.9rem',
+                }}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Password</label>
+              <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
+                Password
+              </label>
               <input
                 type="password"
                 className="form-input"
@@ -287,6 +602,14 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  padding: '0.75rem 1rem',
+                  color: '#ffffff',
+                  fontSize: '0.9rem',
+                }}
               />
             </div>
 
@@ -294,14 +617,30 @@ export default function Login() {
               type="submit"
               className="btn btn-secondary w-full"
               disabled={loading}
-              style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}
+              style={{
+                marginTop: '0.5rem',
+                fontSize: '0.9rem',
+                padding: '0.8rem',
+                fontWeight: 700,
+                color: '#ffffff',
+              }}
             >
-              {loading ? 'Authenticating...' : 'Sign In'}
+              {loading ? 'Authenticating...' : 'Sign In with Credentials'}
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
-            Need a new account? <Link to="/register" style={{ color: '#c4b5fd', fontWeight: 600 }}>Create an account</Link>
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: '1.5rem',
+              fontSize: '0.82rem',
+              color: '#71717a',
+            }}
+          >
+            Need a new account?{' '}
+            <Link to="/register" style={{ color: '#ffffff', fontWeight: 700, textDecoration: 'underline' }}>
+              Create an account
+            </Link>
           </div>
         </div>
       </div>

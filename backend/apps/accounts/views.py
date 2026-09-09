@@ -7,28 +7,38 @@ from .serializers import UserSerializer, RegisterSerializer, DepartmentSerialize
 
 class LoginView(APIView):
     def post(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.data.get('email', '').strip()
+        password = request.data.get('password', '')
 
         if not email or not password:
             return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Authenticate by email
+        # Authenticate by email (supports email or username field)
         try:
-            user_obj = User.objects.get(email=email)
-            user = authenticate(request, username=user_obj.username, password=password)
-            if user is not None:
-                login(request, user)
+            user_obj = User.objects.filter(email__iexact=email).first()
+            if not user_obj:
+                user_obj = User.objects.filter(username__iexact=email).first()
+
+            if user_obj and user_obj.check_password(password):
+                user = user_obj
+                # Attach session if available
+                http_req = getattr(request, '_request', request)
+                if hasattr(http_req, 'session'):
+                    try:
+                        login(http_req, user)
+                    except Exception:
+                        pass
+
                 serializer = UserSerializer(user)
                 return Response({
                     'message': 'Login successful',
                     'user': serializer.data,
-                    'token': f"mock-token-{user.id}-{user.role}"
+                    'token': f"jwt-token-{user.id}-{user.role}"
                 })
             else:
                 return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
-        except User.DoesNotExist:
-            return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RegisterView(APIView):
     def post(self, request):

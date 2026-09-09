@@ -22,6 +22,14 @@ class SimilarityDetailView(APIView):
         except SimilarityResult.DoesNotExist:
             return Response({'error': 'Similarity result not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    def delete(self, request, pk):
+        try:
+            result = SimilarityResult.objects.get(pk=pk)
+            result.delete()
+            return Response({'message': 'Similarity scan deleted successfully'})
+        except SimilarityResult.DoesNotExist:
+            return Response({'error': 'Similarity result not found'}, status=status.HTTP_404_NOT_FOUND)
+
 class SimilarityScanView(APIView):
     def post(self, request):
         project_id = request.data.get('project_id')

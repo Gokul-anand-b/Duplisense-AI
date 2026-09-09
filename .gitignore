@@ -42,9 +42,11 @@ backend/db.sqlite3
 backend/apps/similarity/*.bin
 *.bin
 
-# Uploads & Media
+# Uploads, Media & Static Files
 media/
 backend/media/
+staticfiles/
+backend/staticfiles/
 
 # Environment Variables
 .env

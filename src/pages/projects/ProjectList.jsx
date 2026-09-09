@@ -1,44 +1,64 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { mockProjects } from '../../data/mockData';
+import { projectsApi } from '../../services/api';
 import { formatDate, truncate } from '../../utils/helpers';
 import { PROJECT_STATUSES } from '../../utils/constants';
 
 export default function ProjectList() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 6;
 
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const data = await projectsApi.getAll();
+        if (Array.isArray(data)) {
+          setProjects(data);
+        }
+      } catch (err) {
+        console.warn('Error fetching projects:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProjects();
+  }, []);
+
   const filtered = useMemo(() => {
-    return mockProjects.filter((p) => {
+    return projects.filter((p) => {
+      const techs = p.technologies || p.programming_languages || [];
       const matchesSearch =
         !search ||
         p.title.toLowerCase().includes(search.toLowerCase()) ||
         p.description.toLowerCase().includes(search.toLowerCase()) ||
-        p.technologies.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+        techs.some((t) => t.toLowerCase().includes(search.toLowerCase()));
       const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
-      const matchesDept = deptFilter === 'all' || p.department.name === deptFilter;
+      const deptName = p.department?.name || p.department_name || '';
+      const matchesDept = deptFilter === 'all' || deptName === deptFilter;
       return matchesSearch && matchesStatus && matchesDept;
     });
-  }, [search, statusFilter, deptFilter]);
+  }, [projects, search, statusFilter, deptFilter]);
 
-  const totalPages = Math.ceil(filtered.length / perPage);
+  const totalPages = Math.ceil(filtered.length / perPage) || 1;
   const paged = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
-  const departments = [...new Set(mockProjects.map((p) => p.department.name))];
+  const departments = [...new Set(projects.map((p) => p.department?.name || p.department_name).filter(Boolean))];
 
   return (
     <div className="page-enter">
       <div className="page-header">
         <div className="page-header-row">
           <div>
-            <h1 className="page-title">Enterprise Projects</h1>
-            <p className="page-subtitle">{mockProjects.length} projects cataloged across your organization</p>
+            <h1 className="page-title">Enterprise Projects Catalog</h1>
+            <p className="page-subtitle">{projects.length} real projects stored in database</p>
           </div>
-          <Link to="/submit" className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
-            ⚡ Submit New Project
+          <Link to="/dashboard" className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
+            ⚡ Submit New Proposal
           </Link>
         </div>
       </div>
@@ -60,113 +80,113 @@ export default function ProjectList() {
           onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
         >
           <option value="all">All Statuses</option>
+          <option value="completed">Completed (Baseline)</option>
           <option value="active">Active</option>
-          <option value="completed">Completed</option>
           <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
         </select>
-        <select
-          className="filter-select"
-          value={deptFilter}
-          onChange={(e) => { setDeptFilter(e.target.value); setCurrentPage(1); }}
-        >
-          <option value="all">All Departments</option>
-          {departments.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
+        {departments.length > 0 && (
+          <select
+            className="filter-select"
+            value={deptFilter}
+            onChange={(e) => { setDeptFilter(e.target.value); setCurrentPage(1); }}
+          >
+            <option value="all">All Departments</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* Projects Grid */}
-      {paged.length > 0 ? (
-        <div className="grid-3 stagger-children" style={{ gap: '1.25rem' }}>
-          {paged.map((project) => (
-            <Link
-              key={project.id}
-              to={`/projects/${project.id}`}
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div className="glass-card" style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, flex: 1, lineHeight: 1.3 }}>
-                    {project.title}
-                  </h3>
-                  <span className={`badge ${PROJECT_STATUSES[project.status]?.class || 'badge-draft'}`}>
-                    <span className="badge-dot" />
-                    {PROJECT_STATUSES[project.status]?.label || project.status}
-                  </span>
-                </div>
-
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', flex: 1, marginBottom: '1.25rem', lineHeight: 1.6 }}>
-                  {truncate(project.description, 120)}
-                </p>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.25rem' }}>
-                  {project.technologies.slice(0, 5).map((tech) => (
-                    <span key={tech} className="tech-tag">{tech}</span>
-                  ))}
-                  {project.technologies.length > 5 && (
-                    <span className="tech-tag">+{project.technologies.length - 5}</span>
-                  )}
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  borderTop: '1px solid rgba(16, 185, 129, 0.08)',
-                  paddingTop: '0.85rem',
-                  fontSize: '0.75rem',
-                  color: 'var(--color-text-tertiary)',
-                  flexWrap: 'wrap',
-                  gap: '0.5rem'
-                }}>
-                  <span>👤 {project.submittedBy.firstName} {project.submittedBy.lastName}</span>
-                  <span>🏢 {project.team.name}</span>
-                  <span>{formatDate(project.createdAt)}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
+      {/* Project Grid */}
+      {loading ? (
+        <div className="empty-state" style={{ padding: '3rem' }}>
+          <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 1rem' }} />
+          <h3 className="empty-state-title">Loading Projects from Database...</h3>
+        </div>
+      ) : paged.length === 0 ? (
+        <div className="empty-state" style={{ padding: '3rem' }}>
+          <div className="empty-state-icon">📁</div>
+          <h3 className="empty-state-title">No Projects Found</h3>
+          <p className="empty-state-description">Try adjusting your search criteria</p>
         </div>
       ) : (
-        <div className="empty-state">
-          <div className="empty-state-icon">📁</div>
-          <h3 className="empty-state-title">No projects found</h3>
-          <p className="empty-state-text">Try adjusting your search or filter criteria</p>
+        <div className="grid-3 stagger-children">
+          {paged.map((project) => {
+            const techs = project.technologies || project.programming_languages || [];
+            return (
+              <Link
+                key={project.id}
+                to={`/projects/${project.id}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div className="project-card">
+                  <div className="project-card-header">
+                    <span className="badge badge-active" style={{ fontSize: '0.72rem' }}>
+                      {project.department?.name || project.department_name || 'Engineering'}
+                    </span>
+                    <span className={`badge ${PROJECT_STATUSES[project.status]?.class || 'badge-completed'}`}>
+                      {PROJECT_STATUSES[project.status]?.label || project.status}
+                    </span>
+                  </div>
+
+                  <h3 className="project-card-title">{project.title}</h3>
+                  <p className="project-card-desc">{truncate(project.description, 120)}</p>
+
+                  <div className="project-card-tech">
+                    {techs.slice(0, 4).map((tech) => (
+                      <span key={tech} className="tech-tag">{tech}</span>
+                    ))}
+                    {techs.length > 4 && (
+                      <span className="tech-tag" style={{ background: 'transparent' }}>
+                        +{techs.length - 4}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="project-card-footer">
+                    <span className="text-xs text-muted">
+                      {project.created_at ? formatDate(project.created_at) : 'Active'}
+                    </span>
+                    {project.github_url && (
+                      <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 600 }}>
+                        🌐 Git Repo Available
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pagination" style={{ marginTop: '2rem' }}>
-          <span className="pagination-info">
-            Showing {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, filtered.length)} of {filtered.length}
-          </span>
-          <div className="pagination-controls">
+        <div className="pagination">
+          <button
+            className="pagination-btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
+              key={page}
+              className={`pagination-btn ${page === currentPage ? 'active' : ''}`}
+              onClick={() => setCurrentPage(page)}
             >
-              ←
+              {page}
             </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`pagination-btn ${currentPage === i + 1 ? 'active' : ''}`}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              →
-            </button>
-          </div>
+          ))}
+          <button
+            className="pagination-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

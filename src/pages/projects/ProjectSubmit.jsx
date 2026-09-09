@@ -56,6 +56,69 @@ export default function ProjectSubmit() {
     toast.success('Enterprise Preset Loaded', 'Live demo data auto-populated. Ready for AI vector scan.');
   };
 
+  // Sample Downloadable Test Proposals
+  const SAMPLE_DOCS = [
+    {
+      title: 'Real Estate Property Management & Rental Portal',
+      filename: 'Real_Estate_Property_Management_Portal.docx',
+      format: 'DOCX',
+      badge: 'Matches Gokul Repo (#7)',
+      badgeColor: '#10b981',
+      description: 'Node.js, Express, MySQL, JWT & Multer property listing portal.',
+      path: '/demo_documents/Real_Estate_Property_Management_Portal.docx',
+    },
+    {
+      title: 'Real Estate Portal (Plain Text Spec)',
+      filename: 'Real_Estate_Property_Management_Portal.txt',
+      format: 'TXT',
+      badge: 'Lightweight TXT',
+      badgeColor: '#6366f1',
+      description: 'Raw text architectural spec with requirements and schema.',
+      path: '/demo_documents/Real_Estate_Property_Management_Portal.txt',
+    },
+    {
+      title: 'Enterprise RAG Document Pipeline',
+      filename: 'Enterprise_RAG_Document_Pipeline.pdf',
+      format: 'PDF',
+      badge: 'Matches Baseline (#1)',
+      badgeColor: '#8b5cf6',
+      description: 'Python, FastAPI, Sentence-Transformers & FAISS document processing.',
+      path: '/demo_documents/Enterprise_RAG_Document_Pipeline.pdf',
+    },
+    {
+      title: 'Smart Healthcare Telemetry Hub',
+      filename: 'Smart_Healthcare_Telemetry_Hub.docx',
+      format: 'DOCX',
+      badge: 'Healthcare IoT',
+      badgeColor: '#06b6d4',
+      description: 'IoT telemetry ingestion hub with time-series processing & WebSockets.',
+      path: '/demo_documents/Smart_Healthcare_Telemetry_Hub.docx',
+    },
+    {
+      title: 'Autonomous Robotics Perception System',
+      filename: 'Autonomous_Robotics_Perception_System.txt',
+      format: 'TXT',
+      badge: 'Robotics / C++',
+      badgeColor: '#f59e0b',
+      description: 'ROS2, C++, SLAM & LiDAR point-cloud processing pipeline.',
+      path: '/demo_documents/Autonomous_Robotics_Perception_System.txt',
+    },
+  ];
+
+  const handleLoadSample = async (sample) => {
+    toast.info('Loading Sample Document', `Fetching "${sample.filename}" for instant extraction...`);
+    try {
+      const response = await fetch(sample.path);
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      const blob = await response.blob();
+      const file = new File([blob], sample.filename, { type: blob.type || 'application/octet-stream' });
+      setFiles([file]);
+      handleExtractDocument(file);
+    } catch (err) {
+      toast.error('Download Failed', `Could not load ${sample.filename}: ${err.message}`);
+    }
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -689,6 +752,101 @@ export default function ProjectSubmit() {
                   <option value="active">Active Architecture Review</option>
                   <option value="completed">Production Ready</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Downloadable Test Proposals Panel */}
+            <div className="detail-section" style={{
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.35)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h3 className="detail-section-title" style={{ margin: 0, padding: 0 }}>
+                  <span>📥</span> Demo Documents (Download)
+                </h3>
+                <span className="badge badge-active" style={{ fontSize: '0.65rem', background: 'rgba(139, 92, 246, 0.2)', color: '#c4b5fd', borderColor: '#8b5cf6' }}>
+                  Jury / Test Ready
+                </span>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0', lineHeight: 1.4 }}>
+                Download sample proposals to inspect the files, or click <strong>Test</strong> to auto-load and extract:
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {SAMPLE_DOCS.map((doc, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(15, 23, 42, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '0.65rem 0.75rem',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f1f5f9' }}>
+                        {doc.title}
+                      </span>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px',
+                        background: `${doc.badgeColor}25`,
+                        color: doc.badgeColor,
+                        border: `1px solid ${doc.badgeColor}60`,
+                        fontFamily: 'var(--font-mono)',
+                        marginLeft: '0.35rem',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {doc.format}
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: '0.7rem', color: '#94a3b8', margin: '0 0 0.5rem 0', lineHeight: 1.3 }}>
+                      {doc.description}
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <a
+                        href={doc.path}
+                        download={doc.filename}
+                        className="btn btn-secondary"
+                        style={{
+                          fontSize: '0.68rem',
+                          padding: '0.25rem 0.6rem',
+                          height: 'auto',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        ⬇️ Download
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleLoadSample(doc)}
+                        style={{
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          border: '1px solid rgba(16, 185, 129, 0.4)',
+                          color: '#34d399',
+                          cursor: 'pointer',
+                          padding: '0.25rem 0.6rem',
+                          fontSize: '0.68rem',
+                          borderRadius: '4px',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        ⚡ Test & Extract
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 

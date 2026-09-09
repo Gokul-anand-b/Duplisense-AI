@@ -1,0 +1,34 @@
+# PROJECT PROPOSAL: Real Estate Property Management and Housing Portal
+
+1. Project Title:
+Modern Real Estate Property Management and Rental Portal
+
+2. Executive Summary & Description:
+This project proposes a responsive web portal for property listings, real estate rentals, and house discovery.
+The platform facilitates user registrations, property image uploads, and interactive search filters.
+It provides role-based authentication using JWT tokens and connects with a relational MySQL database.
+
+3. Problem Statement:
+Home seekers, real estate brokers, and tenants often struggle with fragmented property listing platforms.
+There is a need for a secure, unified web portal where owners can post listings with photo attachments,
+and tenants can browse verified properties with real-time inquiries.
+
+4. Objectives:
+- Develop a full-stack web application using Node.js and Express.
+- Implement secure user registration and login with bcrypt and JSON Web Tokens (JWT).
+- Support multi-file property image uploads using Multer middleware.
+- Design and implement a normalized MySQL database schema for property listings, users, and transactions.
+- Provide clean REST API endpoints for property search, filtering, and inquiry submissions.
+
+5. Technology Stack:
+- Programming Languages: JavaScript, SQL, HTML5, CSS3
+- Frameworks & Libraries: Node.js, Express, Socket.IO, EJS
+- Database Technology: MySQL
+- APIs & Protocols: REST API, Multer File Upload, JWT Authentication API
+- Development Tools: Visual Studio Code, Git, Postman
+
+6. Key Functional Modules:
+- User Authentication Module (Register, Login, Password Hashing)
+- Property Management Module (Add Property, Image Upload, Price, Location)
+- Search & Filter Engine (Browse by Location, Price Range, Property Type)
+- Real-time Messaging / Notification Engine
