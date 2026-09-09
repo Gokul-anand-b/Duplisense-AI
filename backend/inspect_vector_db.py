@@ -114,10 +114,30 @@ def demo_live_vector_search(query_text="RAG document extraction pipeline and vec
             print(f"      Signature: {m.get('signature')}")
         print()
 
+def display_raw_vector_embeddings():
+    banner("4. RAW VECTOR EMBEDDING SAMPLES (512-DIMENSIONAL FLOAT ARRAYS)")
+    if os.path.exists(FAISS_CODE_INDEX_FILE):
+        index = faiss.read_index(FAISS_CODE_INDEX_FILE)
+        if index.ntotal > 0:
+            raw_vec = index.reconstruct(0)
+            print(f"[*] Retrieved Vector #0 from 'faiss_code_index.bin'")
+            print(f"[*] Data Type          : {type(raw_vec)} (float32)")
+            print(f"[*] Total Dimensions   : {len(raw_vec)} floats")
+            import numpy as np
+            print(f"[*] L2 Unit Norm       : {np.linalg.norm(raw_vec):.4f} (normalized to unit hypersphere)")
+            print(f"[*] Raw Floating-Point Array (First 20 dimensions):")
+            print("    " + str(list(np.round(raw_vec[:20], 5))))
+            print(f"    ... [{len(raw_vec) - 20} more continuous float values]")
+        else:
+            print("[!] FAISS index is empty.")
+    else:
+        print("[!] FAISS index file not found.")
+
 if __name__ == '__main__':
     inspect_relational_db()
     inspect_vector_databases()
     demo_live_vector_search("JWT authentication and user role permissions")
+    display_raw_vector_embeddings()
     print("=" * 75)
     print("All databases (SQLite + FAISS) verified and functioning properly.")
     print("=" * 75 + "\n")
