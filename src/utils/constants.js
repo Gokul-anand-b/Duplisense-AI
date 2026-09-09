@@ -5,8 +5,7 @@
 export const APP_NAME = 'DupliSense AI';
 export const APP_TAGLINE = 'Duplicate Detection Platform';
 
-// API Base URL — will point to Django backend later
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://duplisense-ai.onrender.com/api' : 'http://localhost:8000/api');
 
 // Similarity Thresholds
 export const SIMILARITY_THRESHOLDS = {

@@ -4,7 +4,7 @@
  * Strict real data: No mock data fallbacks.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://duplisense-ai.onrender.com/api' : 'http://127.0.0.1:8000/api');
 
 async function fetchJson(endpoint, options = {}) {
   try {
